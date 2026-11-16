@@ -42,4 +42,7 @@ fi
 sudo udevadm control --reload
 rm -rf "$WORK_DIR"
 
+# Visualizador gráfico (instalado só para o usuário, sem sudo)
+rm -fv "$HOME/.local/bin/t80-viewer" "$HOME/.local/share/applications/io.github.saulogp.T80Viewer.desktop"
+
 ok "Correção removida. Se o volante estiver conectado e os pedais ainda aparecerem, reconecte-o."

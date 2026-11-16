@@ -9,6 +9,7 @@
 #   3. Compila somente o carregador e a correção do T80.
 #   4. Instala o carregador, a correção e a regra do udev (pede sudo).
 #   5. Aplica a correção na hora se o volante estiver conectado.
+#   6. Compila e instala o visualizador gráfico (gui/) em ~/.local.
 #
 # Pode ser executado de novo sem problema (para atualizar ou reparar).
 #
@@ -17,6 +18,7 @@
 #   WORK_DIR  pasta de compilação (padrão: ~/.cache/t80-settings)
 #   SKIP_APT=1    não instala dependências via apt
 #   BUILD_ONLY=1  só compila (não instala nada; útil para testar)
+#   SKIP_GUI=1    não compila/instala o visualizador gráfico
 
 set -euo pipefail
 
@@ -68,6 +70,7 @@ fi
 if [ "${SKIP_APT:-0}" != 1 ]; then
     info "Instalando dependências de compilação (sudo apt)..."
     pkgs=(git clang llvm libbpf-dev meson ninja-build libudev-dev libelf-dev zlib1g-dev pkg-config cargo rustc)
+    [ "${SKIP_GUI:-0}" = 1 ] || pkgs+=(make gcc libgtk-4-dev)
     if apt-cache show bpftool >/dev/null 2>&1; then
         pkgs+=(bpftool)
     else
@@ -169,6 +172,20 @@ else
             warn "descritor inesperado ($size bytes) em $(basename "$dev"); reconecte o volante."
         fi
     done
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Visualizador gráfico (opcional, instalado só para o usuário)
+# ---------------------------------------------------------------------------
+if [ "${SKIP_GUI:-0}" != 1 ]; then
+    info "Compilando e instalando o visualizador (gui/)..."
+    if pkg-config --exists gtk4; then
+        make -C "$SCRIPT_DIR/gui" --no-print-directory clean all
+        make -C "$SCRIPT_DIR/gui" --no-print-directory install >/dev/null
+        ok "visualizador instalado: ~/.local/bin/t80-viewer (menu: \"Visualizador T80\")"
+    else
+        warn "gtk4 (libgtk-4-dev) não encontrado; pulando o visualizador."
+    fi
 fi
 
 echo

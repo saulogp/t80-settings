@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Visualizador T80
+Comment=Mostra o volante, os pedais e os botões do Thrustmaster T80 em tempo real
+Exec=@BINDIR@/t80-viewer
+Icon=input-gaming
+Terminal=false
+Categories=Game;
+Keywords=volante;wheel;thrustmaster;joystick;pedais;
+StartupNotify=true

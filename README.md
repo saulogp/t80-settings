@@ -52,6 +52,39 @@ para atualizar ou reparar a instalação.
 | `BUILD_ONLY=1` | só compila, não instala nada |
 | `UHB_REF=<commit>` | usa outra versão do udev-hid-bpf (padrão: a versão testada) |
 | `WORK_DIR=<pasta>` | onde compilar (padrão: `~/.cache/t80-settings`) |
+| `SKIP_GUI=1` | não compila/instala o visualizador gráfico |
+
+## Visualizador gráfico
+
+![Visualizador T80](gui/screenshot.png)
+
+O `t80-viewer` (em [`gui/`](gui/), C + GTK4/Cairo) mostra em tempo real o volante
+girando (com o ângulo real dos 270° do T80), os pedais com a porcentagem e o valor bruto,
+o direcional, as borboletas e todos os botões. Cada botão mostra também o código do
+evento Linux (`BTN_*`).
+
+- Na barra de título aparece se o volante está conectado, o modo (PS3/PS4) e se a
+  correção está ativa.
+- Reconecta sozinho quando o volante é desconectado e conectado de novo.
+- Avisa quando o volante está em modo PS4 ou quando a correção não está ativa.
+  Sem a correção, os pedais aparecem como 0% ou 100%.
+
+O `install.sh` já compila e instala o visualizador em `~/.local/bin/t80-viewer`, com um
+atalho **"Visualizador T80"** no menu de aplicativos (use `SKIP_GUI=1` para pular).
+Para compilar à mão:
+
+```bash
+sudo apt install libgtk-4-dev
+make -C gui              # gera gui/t80-viewer
+make -C gui install      # instala em ~/.local (sem sudo)
+```
+
+Também dá para gerar uma imagem sem abrir a janela:
+`t80-viewer --render saida.png` (exemplo) ou `t80-viewer --render saida.png --live`
+(estado atual do volante).
+
+> Os nomes dos botões (□ ✕ ○ △, L1/R1, SELECT/START/PS...) seguem a ordem padrão
+> do protocolo do PS3. As borboletas são L1/R1, e os pedais também acionam L2/R2.
 
 ## Mapeamento resultante
 
@@ -77,7 +110,7 @@ Remove os arquivos instalados e descarrega a correção de um volante conectado.
 As dependências de compilação não são removidas. Se quiser removê-las:
 
 ```bash
-sudo apt remove clang llvm libbpf-dev bpftool meson ninja-build libudev-dev libelf-dev cargo rustc
+sudo apt remove clang llvm libbpf-dev bpftool meson ninja-build libudev-dev libelf-dev cargo rustc libgtk-4-dev
 ```
 
 ### Arquivos instalados
@@ -87,6 +120,8 @@ sudo apt remove clang llvm libbpf-dev bpftool meson ninja-build libudev-dev libe
 | `/usr/local/bin/udev-hid-bpf` | carregador de programas HID-BPF |
 | `/etc/udev-hid-bpf/0010-Thrustmaster__T80.bpf.o` | a correção compilada |
 | `/etc/udev/rules.d/99-hid-bpf-0010-Thrustmaster__T80.rules` | carrega a correção quando o T80 (`044f:b667`) é conectado |
+| `~/.local/bin/t80-viewer` | visualizador gráfico (opcional) |
+| `~/.local/share/applications/io.github.saulogp.T80Viewer.desktop` | atalho do visualizador no menu |
 
 A regra do udev só é ativada para o T80 em modo PS3. Nada roda no boot nem em
 outros dispositivos.
